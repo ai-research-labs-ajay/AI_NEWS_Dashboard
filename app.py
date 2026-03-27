@@ -1,6 +1,3 @@
-import eventlet
-eventlet.monkey_patch()
-
 import json
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
@@ -19,7 +16,8 @@ OUTPUT_FILE = "market_news.json"
 app = Flask(__name__, static_folder="frontend", static_url_path="")
 CORS(app)
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
+# ✅ FIX: use gevent
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
 
 # =========================
 # LOAD SAVED NEWS
@@ -47,20 +45,21 @@ def serve_home():
     return send_from_directory(app.static_folder, "index.html")
 
 # =========================
-# BACKGROUND SCRAPER WRAPPER
+# BACKGROUND SCRAPER
 # =========================
 def start_scraper():
     print("🔥 Background scraper started...")
     background_scraper(socketio)
 
+# ✅ FIX: start only when client connects (Render safe)
+@socketio.on("connect")
+def handle_connect():
+    print("🔌 Client connected")
+    socketio.start_background_task(start_scraper)
+
 # =========================
-# RUN SERVER
+# RUN SERVER (LOCAL ONLY)
 # =========================
 if __name__ == "__main__":
     print("🚀 Starting Flask + WebSocket Server...")
-
-    # ✅ FIX: ensure background thread starts properly
-    socketio.start_background_task(start_scraper)
-
-    # ✅ FIX: required for Render (important)
-    socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
