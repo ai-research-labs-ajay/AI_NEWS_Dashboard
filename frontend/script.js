@@ -26,40 +26,43 @@ function updateTicker(newsList) {
 
     ticker.innerText = tickerText;
 
-    // 🔥 AUTO SPEED CONTROL
     let length = tickerText.length;
-
-    let duration = Math.max(40, length / 5); // dynamic speed
+    let duration = Math.max(40, length / 5);
 
     ticker.style.animation = `scrollTicker ${duration}s linear infinite`;
 }
 
 /* =========================
-   🔥 SOCKET.IO CONNECTION
+   🔥 SOCKET.IO CONNECTION (FIXED)
 ========================= */
-const socket = io("http://127.0.0.1:5000");
 
+// ❌ OLD (REMOVE)
+// const socket = io("http://127.0.0.1:5000");
+
+// ✅ NEW (AUTO detect Render / localhost)
+const socket = io();
+
+/* =========================
+   SOCKET LISTENER
+========================= */
 socket.on("news_update", (data) => {
     console.log("🔥 Live Update:", data);
 
-    const news = data.news || [];
+    const news = data.news || data;  // ✅ FIX fallback
     const geo = data.geo || {};
 
-    // ✅ FIX: merge correctly
     allNews = [...news, ...allNews];
 
     renderNews(allNews);
 
-    // ✅ OPTIONAL: show geo risk in console
-    console.log("🌍 Geo Risk:", geo.risk_level, "| Index:", geo.tension_index);
+    // ticker update
+    updateTicker(allNews);
 
-    // ✅ OPTIONAL: show in UI (ticker)
     if (geo.risk_level) {
         document.getElementById("tickerContent").innerText =
             `🌍 Geo Risk: ${geo.risk_level} | Volatility x${geo.estimated_volatility_increase}`;
     }
 });
-
 
 /* =========================
    FETCH + RENDER
@@ -81,7 +84,6 @@ async function startScraping() {
         allNews = data;
         renderNews(data);
 
-        // 🔴 UPDATE TICKER
         updateTicker(data);
 
     } catch (error) {
@@ -90,6 +92,12 @@ async function startScraping() {
     }
 }
 
+/* =========================
+   AUTO LOAD ON PAGE OPEN (FIXED)
+========================= */
+window.onload = () => {
+    startScraping();
+};
 
 /* =========================
    RENDER FUNCTION
@@ -124,9 +132,8 @@ function renderNews(newsList) {
     });
 }
 
-
 /* =========================
-   FILTER BY SOURCE
+   FILTER
 ========================= */
 function filterSource(source) {
     if (source === "ALL") {
@@ -136,7 +143,6 @@ function filterSource(source) {
         renderNews(filtered);
     }
 }
-
 
 /* =========================
    RISK LOGIC
@@ -151,7 +157,6 @@ function getRisk(news) {
     return "LOW RISK 🟢";
 }
 
-
 /* =========================
    MARKET EFFECT
 ========================= */
@@ -165,9 +170,8 @@ function getMarketEffect(news) {
     return "Sideways 🤝";
 }
 
-
 /* =========================
-   🔍 SEARCH FUNCTION
+   SEARCH
 ========================= */
 function searchNews() {
     const input = document.getElementById("searchBox");
@@ -185,9 +189,8 @@ function searchNews() {
     renderNews(filtered);
 }
 
-
 /* =========================
-   🔥 ACTIVE BUTTON HIGHLIGHT
+   ACTIVE BUTTON
 ========================= */
 function setActiveButton(clickedBtn) {
 
