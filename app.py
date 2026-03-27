@@ -63,4 +63,4 @@ if __name__ == "__main__":
     socketio.start_background_task(start_scraper)
 
     # ✅ FIX: required for Render (important)
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+    socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
