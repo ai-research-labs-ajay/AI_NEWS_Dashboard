@@ -12,3 +12,5 @@ newspaper3k
 
 uvicorn
 fastapi
+gevent
+gevent-websocket
