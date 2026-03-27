@@ -1,0 +1,26 @@
+# torch
+# transformers
+# datasets
+# peft
+# accelerate
+# bitsandbytes
+# trl
+# scipy
+# python-dotenv
+# wandb
+
+# # pip install feedparser newspaper3k vaderSentiment
+# # pip install flask flask-socketio eventlet
+# # pip install eventlet
+# # pip install beautifulsoup4 requests
+
+
+fastapi
+uvicorn
+feedparser
+requests
+beautifulsoup4
+vaderSentiment
+flask_socketio
+eventlet
+pip install aiohttp
